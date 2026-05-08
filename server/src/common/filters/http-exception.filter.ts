@@ -4,10 +4,13 @@ import {
     ArgumentsHost,
     HttpException,
     HttpStatus,
+    Logger,
 } from '@nestjs/common';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
+    private readonly logger = new Logger('Exception');
+
     catch(exception: unknown, host: ArgumentsHost) {
         const ctx = host.switchToHttp();
         const response = ctx.getResponse();
@@ -30,6 +33,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
                 exception.message ||
                 'Something went wrong';
         }
+
+        this.logger.error(`${request.method} ${path} ${statusCode} - ${message}`);
 
         response.status(statusCode).json({
             status: 'error',

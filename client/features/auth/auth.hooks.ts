@@ -32,7 +32,7 @@ export const useLogin = () => {
 // REGISTER
 export const useRegister = () => {
     const router = useRouter();
-    
+
     return useMutation({
         mutationFn: (data: RegisterRequest) => authApi.register(data),
         onSuccess: () => {

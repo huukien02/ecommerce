@@ -12,6 +12,7 @@ import {
   SidebarMenuItem,
   SidebarHeader,
   SidebarFooter,
+  SidebarRail,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -40,7 +41,8 @@ export function AppSidebar() {
                   <span className="truncate font-bold text-lg">E-Commerce</span>
                   <span className="truncate text-xs text-muted-foreground">Admin Dashboard</span>
                 </div>
-              </SidebarMenuButton>
+              </Link>
+            </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>

@@ -2,6 +2,7 @@ import {
     Injectable,
     UnauthorizedException,
     BadRequestException,
+    Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -14,6 +15,8 @@ import { Redis } from 'ioredis';
 
 @Injectable()
 export class AuthService {
+    private readonly logger = new Logger(AuthService.name);
+
     constructor(
         private readonly userService: UserService,
         private readonly jwtService: JwtService,
@@ -23,14 +26,21 @@ export class AuthService {
     async validateUser(email: string, password: string) {
         const user = await this.userService.findByEmail(email);
 
-        if (!user) throw new UnauthorizedException('User not found');
+        if (!user) {
+            this.logger.warn(`Login failed - user not found: ${email}`);
+            throw new UnauthorizedException('User not found');
+        }
 
         if (!user.isActive) {
+            this.logger.warn(`Login failed - inactive account: ${email}`);
             throw new UnauthorizedException('User is inactive');
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) throw new UnauthorizedException('Wrong password');
+        if (!isMatch) {
+            this.logger.warn(`Login failed - wrong password: ${email}`);
+            throw new UnauthorizedException('Wrong password');
+        }
 
         return user;
     }
@@ -66,6 +76,8 @@ export class AuthService {
             7 * 24 * 60 * 60,
         );
 
+        this.logger.log(`Login success: ${user.email} (id=${user.id})`);
+
         return {
             access_token: accessToken,
             refresh_token: refreshToken,
@@ -74,7 +86,10 @@ export class AuthService {
 
     async register(data: RegisterDto) {
         const existing = await this.userService.findByEmail(data.email);
-        if (existing) throw new BadRequestException('Email already exists');
+        if (existing) {
+            this.logger.warn(`Register failed - email already exists: ${data.email}`);
+            throw new BadRequestException('Email already exists');
+        }
 
         const hashed = await bcrypt.hash(data.password, 10);
 
@@ -83,6 +98,7 @@ export class AuthService {
             password: hashed,
         });
 
+        this.logger.log(`Register success: ${user.email} (id=${user.id})`);
         return user;
     }
 
@@ -94,6 +110,7 @@ export class AuthService {
                 secret: this.ensureEnv('JWT_REFRESH_SECRET'),
             });
         } catch (err) {
+            this.logger.warn('Refresh token failed - invalid token');
             throw new UnauthorizedException('Invalid refresh token');
         }
 
@@ -102,16 +119,19 @@ export class AuthService {
         const stored = await this.redis.get(key);
 
         if (!stored) {
+            this.logger.warn(`Refresh token not found in Redis: userId=${decoded.sub}`);
             throw new UnauthorizedException('Refresh token not found');
         }
 
         const isValid = await bcrypt.compare(refreshToken, stored);
 
         if (!isValid) {
+            this.logger.warn(`Refresh token mismatch: userId=${decoded.sub}`);
             throw new UnauthorizedException('Invalid refresh token');
         }
 
         await this.redis.del(key);
+        this.logger.log(`Token refreshed: userId=${decoded.sub}`);
 
         return this.issueNewTokens(decoded);
     }
@@ -167,6 +187,7 @@ export class AuthService {
         const exists = await this.redis.get(key);
 
         if (!exists) {
+            this.logger.warn(`Logout - session already expired: userId=${userId}`);
             return { message: 'Session already logged out' };
         }
 
@@ -179,7 +200,7 @@ export class AuthService {
             15 * 60
         );
 
-
+        this.logger.log(`Logout success: userId=${userId}`);
         return { message: 'Logout success' };
     }
 

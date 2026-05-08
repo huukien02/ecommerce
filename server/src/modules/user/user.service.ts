@@ -56,7 +56,7 @@ export class UserService {
     // 👉 FIND BY EMAIL (auth dùng)
     async findByEmail(email: string) {
         return this.userRepo.findOne({
-            where: { email, isActive: true },
+            where: { email },
         });
     }
 

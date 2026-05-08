@@ -36,8 +36,8 @@ api.interceptors.response.use(
 
                 // Gọi api refresh token
                 const refreshResponse = await axios.post(
-                    `${api.defaults.baseURL}auth/refresh-token`,
-                    { refreshToken },
+                    `${api.defaults.baseURL}auth/refresh`,
+                    { refresh_token: refreshToken },
                     { withCredentials: true }
                 );
 
