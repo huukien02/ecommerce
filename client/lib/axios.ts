@@ -6,6 +6,18 @@ const api = axios.create({
     withCredentials: true,
 });
 
+const shouldSkipRefresh = (url?: string) => {
+    if (!url) return false;
+
+    const normalizedUrl = url
+        .replace(api.defaults.baseURL || "", "")
+        .replace(/^\/+/, "");
+
+    return ["auth/login", "auth/register", "auth/refresh"].some((path) =>
+        normalizedUrl.startsWith(path)
+    );
+};
+
 // Request Interceptor: đính kèm access_token vào header
 api.interceptors.request.use(
     (config) => {
@@ -25,7 +37,11 @@ api.interceptors.response.use(
         const originalRequest = error.config;
 
         // Nếu mã lỗi là 401 (Unauthorized) và request chưa từng được retry
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        if (
+            error.response?.status === 401 &&
+            !originalRequest._retry &&
+            !shouldSkipRefresh(originalRequest.url)
+        ) {
             originalRequest._retry = true;
 
             try {

@@ -9,9 +9,9 @@ import * as bcrypt from 'bcrypt';
 import { UserService } from '../user/user.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
-import { v4 as uuidv4 } from 'uuid';
 import { Inject } from '@nestjs/common';
 import { Redis } from 'ioredis';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -48,7 +48,7 @@ export class AuthService {
     async login(data: LoginDto) {
         const user = await this.validateUser(data.email, data.password);
 
-        const jti = uuidv4();
+        const jti = randomUUID();
 
         const payload = {
             sub: user.id,
@@ -59,7 +59,7 @@ export class AuthService {
 
         const accessToken = await this.jwtService.signAsync(payload, {
             secret: this.ensureEnv('JWT_ACCESS_SECRET'),
-            expiresIn: '15m',
+            expiresIn: '1m',
         });
 
         const refreshToken = await this.jwtService.signAsync(payload, {
@@ -91,11 +91,8 @@ export class AuthService {
             throw new BadRequestException('Email already exists');
         }
 
-        const hashed = await bcrypt.hash(data.password, 10);
-
         const user = await this.userService.create({
             ...data,
-            password: hashed,
         });
 
         this.logger.log(`Register success: ${user.email} (id=${user.id})`);
@@ -137,7 +134,7 @@ export class AuthService {
     }
 
     async issueNewTokens(payload: any) {
-        const newJti = uuidv4();
+        const newJti = randomUUID();
 
         const newPayload = {
             sub: payload.sub,
@@ -148,7 +145,7 @@ export class AuthService {
 
         const accessToken = await this.jwtService.signAsync(newPayload, {
             secret: this.ensureEnv('JWT_ACCESS_SECRET'),
-            expiresIn: '15m',
+            expiresIn: '1m',
         });
 
         const refreshToken = await this.jwtService.signAsync(newPayload, {

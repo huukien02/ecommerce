@@ -10,10 +10,12 @@ export interface RegisterRequest {
 }
 
 export interface User {
-    id: string;
+    id?: string;
+    sub: string;
     name: string;
     email: string;
     role?: string;
+    isActive?: boolean;
 }
 
 export interface TokenData {

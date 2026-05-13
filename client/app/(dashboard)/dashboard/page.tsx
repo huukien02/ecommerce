@@ -5,7 +5,7 @@ import { DollarSign, Users, ShoppingBag, Activity } from "lucide-react";
 
 export default function DashboardPage() {
   return (
-    <div className="p-6 md:p-8 space-y-6">
+    <div className="space-y-6 p-6 md:p-8">
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground">Overview of your store performance.</p>
@@ -22,10 +22,10 @@ export default function DashboardPage() {
             <p className="text-xs text-muted-foreground">+20.1% from last month</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Subscriptions</CardTitle>
+            <CardTitle className="text-sm font-medium">Customers</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -33,7 +33,7 @@ export default function DashboardPage() {
             <p className="text-xs text-muted-foreground">+180.1% from last month</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Sales</CardTitle>
@@ -44,7 +44,7 @@ export default function DashboardPage() {
             <p className="text-xs text-muted-foreground">+19% from last month</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Active Now</CardTitle>
@@ -56,12 +56,12 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-      
-      <div className="h-[400px] rounded-xl border bg-card text-card-foreground shadow flex items-center justify-center">
-         <p className="text-muted-foreground flex items-center gap-2">
-            <Activity className="w-5 h-5 animate-pulse" />
-            Charts will appear here
-         </p>
+
+      <div className="flex h-[400px] items-center justify-center rounded-lg border bg-card text-card-foreground shadow">
+        <p className="flex items-center gap-2 text-muted-foreground">
+          <Activity className="h-5 w-5 animate-pulse" />
+          Charts will appear here
+        </p>
       </div>
     </div>
   );

@@ -4,12 +4,13 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Bell, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
-export function AppHeader() {
+export function AppHeader({ showSidebarTrigger = true }: { showSidebarTrigger?: boolean }) {
   return (
     <header className="sticky top-0 z-50 w-full h-16 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-full items-center px-4 md:px-6">
-        <SidebarTrigger className="mr-4" />
+        {showSidebarTrigger && <SidebarTrigger className="mr-4" />}
         
         <div className="flex flex-1 items-center gap-4 md:gap-8">
           <form className="hidden md:flex flex-1 max-w-sm relative">
@@ -23,6 +24,9 @@ export function AppHeader() {
         </div>
 
         <div className="flex items-center gap-2">
+          <Button asChild variant="ghost" size="sm">
+            <Link href="/">Store</Link>
+          </Button>
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="h-5 w-5" />
             <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full"></span>

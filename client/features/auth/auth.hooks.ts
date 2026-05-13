@@ -1,77 +1,70 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { authApi } from "./auth.api";
-import {
-    LoginRequest,
-    RegisterRequest,
-} from "./auth.types";
-import { setTokens, clearTokens } from "@/lib/token";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { clearTokens, setTokens } from "@/lib/token";
+import { authApi } from "./auth.api";
+import { LoginRequest, RegisterRequest } from "./auth.types";
 
-// LOGIN
 export const useLogin = () => {
-    const router = useRouter();
-    const queryClient = useQueryClient();
+  const router = useRouter();
+  const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: (data: LoginRequest) => authApi.login(data),
-        onSuccess: (res) => {
-            if (res.data && res.data.access_token) {
-                setTokens(res.data.access_token, res.data.refresh_token);
-                queryClient.invalidateQueries({ queryKey: ["me"] });
-                toast.success("Đăng nhập thành công!");
-                router.push("/profile");
-            }
-        },
-        onError: (error: any) => {
-            toast.error(error?.response?.data?.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại!");
-        }
-    });
+  return useMutation({
+    mutationFn: (data: LoginRequest) => authApi.login(data),
+    onSuccess: async (res) => {
+      if (res.data?.access_token) {
+        setTokens(res.data.access_token, res.data.refresh_token);
+        queryClient.invalidateQueries({ queryKey: ["me"] });
+        const me = await authApi.me();
+        toast.success("Login successful");
+        router.push(me.data.role === "admin" ? "/admin/dashboard" : "/profile");
+      }
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || "Login failed");
+    },
+  });
 };
 
-// REGISTER
 export const useRegister = () => {
-    const router = useRouter();
+  const router = useRouter();
 
-    return useMutation({
-        mutationFn: (data: RegisterRequest) => authApi.register(data),
-        onSuccess: () => {
-            toast.success("Đăng ký thành công! Vui lòng đăng nhập.");
-            router.push("/login");
-        },
-        onError: (error: any) => {
-            toast.error(error?.response?.data?.message || "Đăng ký thất bại.");
-        }
-    });
+  return useMutation({
+    mutationFn: (data: RegisterRequest) => authApi.register(data),
+    onSuccess: () => {
+      toast.success("Register successful. Please login.");
+      router.push("/login");
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || "Register failed");
+    },
+  });
 };
 
-// GET CURRENT USER
-export const useMe = () => {
-    return useQuery({
-        queryKey: ["me"],
-        queryFn: authApi.me,
-        retry: false,
-    });
-};
+export const useMe = () =>
+  useQuery({
+    queryKey: ["me"],
+    queryFn: authApi.me,
+    retry: false,
+  });
 
-// LOGOUT
 export const useLogout = () => {
-    const router = useRouter();
-    const queryClient = useQueryClient();
+  const router = useRouter();
+  const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: authApi.logout,
-        onSuccess: () => {
-            clearTokens();
-            queryClient.clear();
-            toast.success("Đã đăng xuất an toàn.");
-            router.push("/login");
-        },
-        onError: () => {
-            clearTokens();
-            queryClient.clear();
-            toast.error("Đã đăng xuất.");
-            router.push("/login");
-        }
-    });
+  return useMutation({
+    mutationFn: authApi.logout,
+    onSuccess: () => {
+      clearTokens();
+      queryClient.clear();
+      toast.success("Logged out");
+      router.push("/login");
+    },
+    onError: () => {
+      clearTokens();
+      queryClient.clear();
+      toast.error("Logged out");
+      router.push("/login");
+    },
+  });
 };

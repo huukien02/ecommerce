@@ -2,43 +2,19 @@
 
 import { useMe, useLogout } from "@/features/auth/auth.hooks";
 import { Button } from "@/components/ui/button";
-import { LogOut, User as UserIcon, Mail, Shield } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { LogOut, User as UserIcon, Mail } from "lucide-react";
 
 export default function ProfilePage() {
-    const { data: meResponse, isLoading, isError } = useMe();
+    const { data } = useMe();
     const { mutate: logout, isPending: isLoggingOut } = useLogout();
-    const router = useRouter();
 
-    useEffect(() => {
-        if (isError) {
-            router.push("/login");
-        }
-    }, [isError, router]);
 
-    if (isLoading) {
-        return (
-            <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center bg-background">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-            </div>
-        );
-    }
-
-    if (!meResponse?.data) {
-        return null; // Tránh flash nội dung trước khi redirect
-    }
-
-    const rawData = meResponse.data as any;
-    const user = rawData?.user ? rawData.user : rawData;
-
-    const userName = user?.name || "User";
-    const userEmail = user?.email || "Unknown Email";
-    const userId = user?.id || "N/A";
-    const userRole = user?.role || "Member";
+    const userName = data?.data?.name || "User";
+    const userEmail = data?.data?.email || "Unknown Email";
+    const userRole = data?.data?.role || "Member";
 
     return (
-        <div className="min-h-[calc(100vh-8rem)] bg-background flex flex-col items-center justify-center p-4 relative overflow-hidden w-full">
+        <div className="min-h-[calc(100vh-16rem)] bg-background flex flex-col items-center justify-center p-4 relative overflow-hidden w-full">
             {/* Background elements */}
             <div className="absolute w-[800px] h-[800px] bg-violet-600/10 rounded-full blur-[100px] -top-40 -right-40 animate-pulse duration-1000"></div>
             <div className="absolute w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[100px] bottom-0 -left-20 dark:mix-blend-screen mix-blend-multiply"></div>
@@ -78,15 +54,6 @@ export default function ProfilePage() {
                             </div>
                         </div>
 
-                        <div className="flex items-center p-4 rounded-2xl bg-muted/50 border border-border">
-                            <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center mr-4">
-                                <Shield className="w-5 h-5 text-emerald-500 dark:text-emerald-300" />
-                            </div>
-                            <div>
-                                <p className="text-sm text-muted-foreground">Account ID</p>
-                                <p className="text-foreground font-medium font-mono text-sm">{userId}</p>
-                            </div>
-                        </div>
                     </div>
 
                     <Button

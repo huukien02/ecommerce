@@ -21,10 +21,7 @@ const FormLabel = ({ className, ...props }: any) => (
     <label className={cn("text-sm font-medium", className)} {...props} />
 );
 
-const FormControl = ({ ...props }: any) => {
-    const { field } = useFormContext();
-    return <div {...field} {...props} />;
-};
+const FormControl = ({ ...props }: any) => <div {...props} />;
 
 const FormMessage = ({ name }: any) => {
     const {

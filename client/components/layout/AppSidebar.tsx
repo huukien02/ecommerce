@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, User, ShoppingBag, Settings } from "lucide-react";
+import { Home, User, ShoppingBag, Settings, ReceiptText, ShoppingCart } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -18,8 +18,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const items = [
-  { title: "Dashboard", url: "/", icon: Home },
+  { title: "Dashboard", url: "/dashboard", icon: Home },
   { title: "Products", url: "/products", icon: ShoppingBag },
+  { title: "Cart", url: "/cart", icon: ShoppingCart },
+  { title: "Orders", url: "/orders", icon: ReceiptText },
   { title: "Profile", url: "/profile", icon: User },
   { title: "Settings", url: "/settings", icon: Settings },
 ];

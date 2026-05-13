@@ -6,6 +6,10 @@ import { AuthModule } from './modules/auth/auth.module';
 import { RedisModule } from './common/redis/redis.module';
 import { ConfigModule } from '@nestjs/config';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { CategoryModule } from './modules/category/category.module';
+import { ProductModule } from './modules/product/product.module';
+import { CartModule } from './modules/cart/cart.module';
+import { OrderModule } from './modules/order/order.module';
 
 @Module({
   imports: [
@@ -16,6 +20,10 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
     RedisModule,
     AuthModule,
     UserModule,
+    CategoryModule,
+    ProductModule,
+    CartModule,
+    OrderModule,
   ],
 })
 export class AppModule implements NestModule {
