@@ -3,14 +3,25 @@ import {
   AdminProductListResponse,
   CategoryPayload,
   CategoryResponse,
+  CreateUserPayload,
   OrderListResponse,
   OrderResponse,
   ProductPayload,
   ProductResponse,
+  UpdateUserPayload,
   UserListResponse,
 } from "./admin.types";
 
+const LIMIT = 10;
+
+export type ProductFilters = {
+  categoryId?: string;
+  sort?: "newest" | "price_asc" | "price_desc";
+  status?: "active" | "draft" | "out_of_stock" | "all";
+};
+
 export const adminApi = {
+  // ── Categories ──────────────────────────────────────────────────────────────
   createCategory: async (data: CategoryPayload): Promise<CategoryResponse> => {
     const res = await api.post("/categories", data);
     return res.data;
@@ -24,8 +35,22 @@ export const adminApi = {
     return res.data;
   },
 
-  products: async (): Promise<AdminProductListResponse> => {
-    const res = await api.get("/products", { params: { limit: 100 } });
+  // ── Products ────────────────────────────────────────────────────────────────
+  products: async (
+    page = 1,
+    search = "",
+    filters: ProductFilters = {}
+  ): Promise<AdminProductListResponse> => {
+    const res = await api.get("/products", {
+      params: {
+        page,
+        limit: LIMIT,
+        status: filters.status ?? "all",
+        ...(search && { search }),
+        ...(filters.categoryId && { categoryId: filters.categoryId }),
+        ...(filters.sort && { sort: filters.sort }),
+      },
+    });
     return res.data;
   },
   createProduct: async (data: ProductPayload): Promise<ProductResponse> => {
@@ -41,8 +66,11 @@ export const adminApi = {
     return res.data;
   },
 
-  orders: async (): Promise<OrderListResponse> => {
-    const res = await api.get("/orders");
+  // ── Orders ──────────────────────────────────────────────────────────────────
+  orders: async (page = 1, search = ""): Promise<OrderListResponse> => {
+    const res = await api.get("/orders", {
+      params: { page, limit: LIMIT, ...(search && { search }) },
+    });
     return res.data;
   },
   updateOrderStatus: async (
@@ -53,8 +81,23 @@ export const adminApi = {
     return res.data;
   },
 
-  users: async (): Promise<UserListResponse> => {
-    const res = await api.get("/users", { params: { limit: 100 } });
+  // ── Users ───────────────────────────────────────────────────────────────────
+  users: async (page = 1, search = ""): Promise<UserListResponse> => {
+    const res = await api.get("/users", {
+      params: { page, limit: LIMIT, ...(search && { search }) },
+    });
+    return res.data;
+  },
+  createUser: async (data: CreateUserPayload) => {
+    const res = await api.post("/users", data);
+    return res.data;
+  },
+  updateUser: async (id: string, data: UpdateUserPayload) => {
+    const res = await api.patch(`/users/${id}`, data);
+    return res.data;
+  },
+  deleteUser: async (id: string) => {
+    const res = await api.delete(`/users/${id}`);
     return res.data;
   },
 };

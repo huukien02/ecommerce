@@ -5,12 +5,12 @@ import {
     BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { plainToInstance } from 'class-transformer';
 
 import { User } from './user.entity';
-import { PaginationDto } from '../../common/pagination/pagination.dto';
+import { UserQueryDto } from './dto/user-query.dto';
 import { paginate } from '../../common/pagination/pagination.util';
 
 // 👉 DTO (bạn cần tạo file riêng)
@@ -71,14 +71,18 @@ export class UserService {
         return this.transform(user);
     }
 
-    // 👉 PAGINATION
-    async findAll(query: PaginationDto) {
+    // 👉 PAGINATION + SEARCH
+    async findAll(query: UserQueryDto) {
+        const where = query.search
+            ? [
+                  { isActive: true, name: ILike(`%${query.search}%`) },
+                  { isActive: true, email: ILike(`%${query.search}%`) },
+              ]
+            : { isActive: true };
+
         const result = await paginate(
             this.userRepo,
-            {
-                where: { isActive: true },
-                order: { createdAt: 'DESC' },
-            },
+            { where, order: { createdAt: 'DESC' } },
             query,
         );
 

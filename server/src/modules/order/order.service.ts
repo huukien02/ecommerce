@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { OrderQueryDto } from './dto/order-query.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CartService } from '../cart/cart.service';
@@ -87,8 +88,29 @@ export class OrderService {
         });
     }
 
-    async findAll() {
-        return this.orderRepo.find({ order: { createdAt: 'DESC' } });
+    async findAll(query: OrderQueryDto) {
+        const page = Number(query.page || 1);
+        const limit = Number(query.limit || 10);
+
+        const qb = this.orderRepo
+            .createQueryBuilder('order')
+            .leftJoinAndSelect('order.items', 'items')
+            .orderBy('order.createdAt', 'DESC');
+
+        if (query.search) {
+            const s = `%${query.search}%`;
+            qb.where(
+                '(order.customerName ILIKE :s OR order.phone ILIKE :s OR CAST(order.id AS VARCHAR) ILIKE :s)',
+                { s },
+            );
+        }
+
+        const [items, total] = await qb
+            .skip((page - 1) * limit)
+            .take(limit)
+            .getManyAndCount();
+
+        return { items, total, page, limit, totalPages: Math.ceil(total / limit) };
     }
 
     async findOne(id: string, requester: { sub: string; role: UserRole }) {

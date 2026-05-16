@@ -24,7 +24,7 @@ services:
       JWT_REFRESH_SECRET: dev_refresh_secret_change_in_prod
       CHOKIDAR_USEPOLLING: "true"
       WATCHPACK_POLLING: "true"
-    command: npm run start:dev
+    command: sh -c "npm run seed && npm run start:dev"
     depends_on:
       postgres:
         condition: service_healthy

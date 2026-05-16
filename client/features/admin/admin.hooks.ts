@@ -1,12 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { adminApi } from "./admin.api";
-import { CategoryPayload, ProductPayload } from "./admin.types";
+import { adminApi, ProductFilters } from "./admin.api";
+import { CategoryPayload, CreateUserPayload, ProductPayload, UpdateUserPayload } from "./admin.types";
 
-export const useAdminProducts = () =>
+// ── Products ──────────────────────────────────────────────────────────────────
+
+export const useAdminProducts = (page = 1, search = "", filters: ProductFilters = {}) =>
   useQuery({
-    queryKey: ["admin-products"],
-    queryFn: adminApi.products,
+    queryKey: ["admin-products", page, search, filters],
+    queryFn: () => adminApi.products(page, search, filters),
+    placeholderData: (prev) => prev,
   });
 
 export const useCreateProduct = () => {
@@ -16,9 +19,10 @@ export const useCreateProduct = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
       queryClient.invalidateQueries({ queryKey: ["products"] });
-      toast.success("Product created");
+      toast.success("Tạo sản phẩm thành công");
     },
-    onError: (error: any) => toast.error(error?.response?.data?.message || "Cannot create product"),
+    onError: (error: any) =>
+      toast.error(error?.response?.data?.message || "Không thể tạo sản phẩm"),
   });
 };
 
@@ -30,9 +34,10 @@ export const useUpdateProduct = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
       queryClient.invalidateQueries({ queryKey: ["products"] });
-      toast.success("Product updated");
+      toast.success("Cập nhật sản phẩm thành công");
     },
-    onError: (error: any) => toast.error(error?.response?.data?.message || "Cannot update product"),
+    onError: (error: any) =>
+      toast.error(error?.response?.data?.message || "Không thể cập nhật sản phẩm"),
   });
 };
 
@@ -43,10 +48,13 @@ export const useDeleteProduct = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
       queryClient.invalidateQueries({ queryKey: ["products"] });
-      toast.success("Product deleted");
+      toast.success("Đã xóa sản phẩm");
     },
+    onError: () => toast.error("Không thể xóa sản phẩm"),
   });
 };
+
+// ── Categories ────────────────────────────────────────────────────────────────
 
 export const useCreateCategory = () => {
   const queryClient = useQueryClient();
@@ -54,9 +62,10 @@ export const useCreateCategory = () => {
     mutationFn: (data: CategoryPayload) => adminApi.createCategory(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
-      toast.success("Category created");
+      toast.success("Tạo danh mục thành công");
     },
-    onError: (error: any) => toast.error(error?.response?.data?.message || "Cannot create category"),
+    onError: (error: any) =>
+      toast.error(error?.response?.data?.message || "Không thể tạo danh mục"),
   });
 };
 
@@ -67,9 +76,10 @@ export const useUpdateCategory = () => {
       adminApi.updateCategory(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
-      toast.success("Category updated");
+      toast.success("Cập nhật danh mục thành công");
     },
-    onError: (error: any) => toast.error(error?.response?.data?.message || "Cannot update category"),
+    onError: (error: any) =>
+      toast.error(error?.response?.data?.message || "Không thể cập nhật danh mục"),
   });
 };
 
@@ -79,15 +89,19 @@ export const useDeleteCategory = () => {
     mutationFn: adminApi.deleteCategory,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
-      toast.success("Category deleted");
+      toast.success("Đã xóa danh mục");
     },
+    onError: () => toast.error("Không thể xóa danh mục"),
   });
 };
 
-export const useAdminOrders = () =>
+// ── Orders ────────────────────────────────────────────────────────────────────
+
+export const useAdminOrders = (page = 1, search = "") =>
   useQuery({
-    queryKey: ["admin-orders"],
-    queryFn: adminApi.orders,
+    queryKey: ["admin-orders", page, search],
+    queryFn: () => adminApi.orders(page, search),
+    placeholderData: (prev) => prev,
   });
 
 export const useUpdateOrderStatus = () => {
@@ -102,13 +116,56 @@ export const useUpdateOrderStatus = () => {
     }) => adminApi.updateOrderStatus(id, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-orders"] });
-      toast.success("Order status updated");
+      toast.success("Cập nhật trạng thái thành công");
     },
+    onError: () => toast.error("Không thể cập nhật trạng thái"),
   });
 };
 
-export const useAdminUsers = () =>
+// ── Users ─────────────────────────────────────────────────────────────────────
+
+export const useAdminUsers = (page = 1, search = "") =>
   useQuery({
-    queryKey: ["admin-users"],
-    queryFn: adminApi.users,
+    queryKey: ["admin-users", page, search],
+    queryFn: () => adminApi.users(page, search),
+    placeholderData: (prev) => prev,
   });
+
+export const useCreateUser = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: CreateUserPayload) => adminApi.createUser(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      toast.success("Tạo tài khoản thành công");
+    },
+    onError: (error: any) =>
+      toast.error(error?.response?.data?.message || "Không thể tạo tài khoản"),
+  });
+};
+
+export const useUpdateUser = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateUserPayload }) =>
+      adminApi.updateUser(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      toast.success("Cập nhật tài khoản thành công");
+    },
+    onError: (error: any) =>
+      toast.error(error?.response?.data?.message || "Không thể cập nhật tài khoản"),
+  });
+};
+
+export const useDeleteUser = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: adminApi.deleteUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      toast.success("Đã xóa tài khoản");
+    },
+    onError: () => toast.error("Không thể xóa tài khoản"),
+  });
+};

@@ -46,8 +46,15 @@ export class ProductService {
         const limit = Number(query.limit || 12);
         const qb = this.productRepo
             .createQueryBuilder('product')
-            .leftJoinAndSelect('product.category', 'category')
-            .where('product.status = :status', { status: ProductStatus.ACTIVE });
+            .leftJoinAndSelect('product.category', 'category');
+
+        if (query.status === 'all') {
+            // no filter — admin xem tất cả
+        } else if (query.status) {
+            qb.where('product.status = :status', { status: query.status });
+        } else {
+            qb.where('product.status = :status', { status: ProductStatus.ACTIVE });
+        }
 
         if (query.search) {
             qb.andWhere('(LOWER(product.name) LIKE :search OR LOWER(product.sku) LIKE :search)', {

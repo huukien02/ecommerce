@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { UserRole } from '../user/user.entity';
 import { CheckoutDto } from './dto/checkout.dto';
+import { OrderQueryDto } from './dto/order-query.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { OrderService } from './order.service';
 
@@ -25,8 +26,8 @@ export class OrderController {
     @UseGuards(RolesGuard)
     @Roles(UserRole.ADMIN)
     @Get()
-    findAll() {
-        return this.orderService.findAll();
+    findAll(@Query() query: OrderQueryDto) {
+        return this.orderService.findAll(query);
     }
 
     @Get(':id')

@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 
 import { UserService } from './user.service';
-import { PaginationDto } from '../../common/pagination/pagination.dto';
+import { UserQueryDto } from './dto/user-query.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -26,7 +26,7 @@ export class UserController {
     constructor(private readonly userService: UserService) { }
 
     @Get()
-    getAll(@Query() query: PaginationDto) {
+    getAll(@Query() query: UserQueryDto) {
         return this.userService.findAll(query);
     }
 

@@ -8,6 +8,20 @@ export type CategoryPayload = {
   isActive?: boolean;
 };
 
+export type CreateUserPayload = {
+  name: string;
+  email: string;
+  password: string;
+  role?: "user" | "admin";
+};
+
+export type UpdateUserPayload = {
+  name?: string;
+  email?: string;
+  password?: string;
+  role?: "user" | "admin";
+};
+
 export type ProductPayload = {
   name: string;
   description?: string;
@@ -20,17 +34,20 @@ export type ProductPayload = {
   categoryId?: string | null;
 };
 
-export type UserList = {
-  items: User[];
+export type PaginatedList<T> = {
+  items: T[];
   total: number;
   page: number;
   limit: number;
   totalPages: number;
 };
 
+export type UserList = PaginatedList<User>;
+export type OrderList = PaginatedList<Order>;
+
 export type CategoryResponse = ApiResponse<Category>;
 export type ProductResponse = ApiResponse<Product>;
 export type AdminProductListResponse = ApiResponse<ProductList>;
-export type OrderListResponse = ApiResponse<Order[]>;
+export type OrderListResponse = ApiResponse<OrderList>;
 export type OrderResponse = ApiResponse<Order>;
 export type UserListResponse = ApiResponse<UserList>;
